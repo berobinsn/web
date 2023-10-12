@@ -83,7 +83,7 @@ def talion():
         for number in range(max(values) + 1):
             results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})'''
 
-        return render_template("talion_results.html")
+        return render_template("talion_results.html", quantity=f"{quantity:,}")
     else:
         return render_template("talion.html")
 
