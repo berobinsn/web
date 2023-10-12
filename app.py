@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, redirect, session
 import requests
 import json
+import mtg_parser
+import re
+from unidecode import unidecode
 
 app = Flask(__name__)
 app.secret_key = '1lgf8absm30yh31lasdfbt40311ubn'
@@ -9,21 +12,26 @@ app.secret_key = '1lgf8absm30yh31lasdfbt40311ubn'
 def index():
     return render_template("index.html")
 
+
 @app.route('/about')
 def about():
     return render_template("about.html")
+
 
 @app.route('/mtg_projects')
 def mtg_projects():
     return render_template("mtg_projects.html")
 
+
 @app.route('/other_projects')
 def other_projects():
     return render_template("other_projects.html")
 
+
 @app.route('/contact')
 def contact():
     return render_template("contact.html")
+
 
 @app.route('/talion', methods=["POST", "GET"])
 def talion():
@@ -86,9 +94,192 @@ def talion():
     else:
         return render_template("talion.html")
 
+
 @app.route('/talion_results')
 def talion_results():
     return render_template("talion_results.html")
+
+
+@app.route('/uniqueness', methods=["POST", "GET"])
+def uniqueness():
+    if request.method == "POST":
+        session.clear()
+        url = request.form['url'].strip()
+        commander, your_deck, error = get_your_deck(url)
+        if error != None:
+            return render_template("uniqueness.html", error=error)
+        average_deck, error = get_average_deck(commander)
+        if error != None:
+            return render_template("uniqueness.html", error=error)
+        edhrec_list, error = get_edhrec_list(commander)
+        (
+            unique_average_count,
+            unique_average_list,
+            overlap_average_count,
+            overlap_average_list,
+        ) = get_card_counts(your_deck, average_deck)
+        (
+            unique_edhrec_count,
+            unique_edhrec_list,
+            overlap_edhrec_count,
+            overlap_edhrec_list,
+        ) = get_card_counts(your_deck, edhrec_list)
+        session['unique_average_list'] = unique_average_list
+        session['unique_edhrec_list'] = unique_edhrec_list
+        session['overlap_average_list'] = overlap_average_list
+        session['overlap_edhrec_list'] = overlap_edhrec_list
+        return render_template("uniqueness_results.html", 
+                               unique_average_count=unique_average_count,
+                               overlap_average_count=overlap_average_count,
+                               unique_edhrec_count=unique_edhrec_count,
+                               overlap_edhrec_count=overlap_edhrec_count
+                               )
+
+    else:
+        return render_template("uniqueness.html")
+
+
+@app.route('/uniqueness_results')
+def uniqueness_results():
+    render_template("uniqueness_results.html")
+
+@app.route("/view_lists")
+def view_lists():
+    unique_average_list = session.get('unique_average_list', [])
+    unique_edhrec_list = session.get('unique_edhrec_list', [])
+    overlap_average_list = session.get('overlap_average_list', [])
+    overlap_edhrec_list = session.get('overlap_edhrec_list', [])
+    return render_template("view_lists.html",
+                           unique_average_list=unique_average_list,
+                           unique_edhrec_list=unique_edhrec_list,
+                           overlap_average_list=overlap_average_list,
+                           overlap_edhrec_list=overlap_edhrec_list)
+
+
+def get_your_deck(url):
+    error = None
+    try:
+        cards = mtg_parser.parse_deck(url)
+    except KeyError:
+        error = "Could not find your decklist"
+        return None, None, error
+    
+    commander_list = []
+    decklist = []
+
+    try:
+        for card in cards:
+            if commander_match := re.search(r".* \[commander\]$", str(card)):
+                name = re.sub(r" \[commander\]$", "", unidecode(str(card)))
+                name = re.sub(r" \d+$", "", name)
+                name = re.sub(r" \(\w\w\w\w?\w?\)$", "", name)
+                name = re.sub(r"^\d+x* ", "", name)
+                commander_list.append(name)
+            maybeboard = re.search(r".*\[.*maybeboard.*\]$", str(card))
+            sideboard = re.search(r".*\[.*sideboard.*\]$", str(card))
+            if maybeboard == None and sideboard == None:
+                cardname = re.sub(r"^\d+x* ", "", unidecode(str(card)))
+                cardname = re.sub(r" \[.*\]$", "", cardname)
+                cardname = re.sub(r" \(\w\w\w\w?\w?\).*$", "", cardname)
+                decklist.append(cardname)
+    except (KeyError, TypeError):
+        error = "Could not find your decklist"
+        return None, None, error
+
+    if len(commander_list) == 0:
+        error = "Your decklist does not have a commander selected"
+        return None, None, error
+
+    return commander_list, decklist, error
+
+
+def get_average_deck(commander):
+    error = None
+    dashed_commander, reverse_dashed_commander, error = convert_to_dashes(commander)
+    try:
+        url = f"https://json.edhrec.com/pages/average-decks/{dashed_commander}.json"
+        response = requests.get(url)
+        if response.status_code != 200:
+            error = "Your commander was not found on edhREC's average decklist page."
+        file = json.loads(response.text)
+        deck = file["deck"]
+    except KeyError:
+        url = f"https://json.edhrec.com/pages/average-decks/{reverse_dashed_commander}.json"
+        response = requests.get(url)
+        if response.status_code != 200:
+            error = "Your commander was not found on edhREC's average decklist page."
+        file = json.loads(response.text)
+        deck = file["deck"]
+    average_decklist = []
+    for card in deck:
+        card = re.sub(r"^\d+ ", "", card)
+        average_decklist.append(card)
+    return average_decklist, error
+
+
+def get_edhrec_list(commander):
+    error = None
+    dashed_commander, reverse_dashed_commander, error = convert_to_dashes(commander)
+    try:
+        url = f"https://json.edhrec.com/pages/commanders/{dashed_commander}.json"
+        response = requests.get(url)
+        if response.status_code != 200:
+            error = "Your commander was not found on the commander page for edhREC"
+        file = json.loads(response.text)
+        decklist = file["container"]["json_dict"]["cardlists"]
+    except KeyError:
+        url = (
+            f"https://json.edhrec.com/pages/commanders/{reverse_dashed_commander}.json"
+        )
+        response = requests.get(url)
+        if response.status_code != 200:
+            error = "Your commander was not found on the commander page for edhREC"
+        file = json.loads(response.text)
+        decklist = file["container"]["json_dict"]["cardlists"]
+    edhrec_cards = []
+    for cardview in decklist:
+        for card in cardview["cardviews"]:
+            edhrec_cards.append(card["name"])
+    return edhrec_cards, error
+
+
+def convert_to_dashes(commander):
+    dashed_commander = []
+    for card in sorted(commander):
+        card = re.sub(r" // .*$", "", unidecode(card.lower()))
+        card = re.sub(r"-", " ", card)
+        card = re.sub(r" ", "_", card)
+        card = re.sub(r"\W", "", card)
+        card = re.sub(r"_", "-", card)
+        dashed_commander.append(card)
+    if len(dashed_commander) == 0:
+        error = "The decklist does not have a commander selected"
+        return None, None, error
+    elif len(dashed_commander) == 1:
+        return dashed_commander[0], None, None
+    else:
+        return (
+            f"{dashed_commander[0]}-{dashed_commander[1]}",
+            f"{dashed_commander[1]}-{dashed_commander[0]}",
+            None
+        )
+    
+
+def get_card_counts(yours, edhrec):
+    unique_count = 0
+    overlap_count = 0
+    unique_list = []
+    overlap_list = []
+    for card in yours:
+        if card in edhrec:
+            overlap_count += 1
+            overlap_list.append(card)
+        else:
+            unique_count += 1
+            unique_list.append(card)
+
+    return unique_count, unique_list, overlap_count, overlap_list
+
 
 if __name__ == '__main__':
     app.run()

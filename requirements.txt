@@ -1,3 +1,5 @@
 Flask
 Gunicorn
 requests
+mtg-parser
+Unidecode
