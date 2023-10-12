@@ -1,10 +1,11 @@
-from flask import Flask
+from flask import Flask, render_template, request, redirect, session
 
 app = Flask(__name__)
+app.secret_key = '1lgf8absm30yh31lasdfbt40311ubn'
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def index():
+    return render_template("index.html")
 
 if __name__ == '__main__':
     app.run()
