@@ -170,9 +170,9 @@ def comparisons():
         
         for decklist in masterlist:
             decklist['budget'] = f"{decklist['budget']:.2f}"
-            decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
+            '''decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
             decklist['saltiestvalue'] = f"{decklist['saltiestvalue']:.2f}"
-            decklist['mv'] = f"{decklist['mv']:.2f}"
+            decklist['mv'] = f"{decklist['mv']:.2f}"'''
         
         budgets = []
         for decklist in masterlist:
@@ -182,25 +182,25 @@ def comparisons():
                     budgetlist.append(f"{deck_card['quantity']} {deck_card['cardname']} ${deck_card['price']:.2f}")
             budgets.append({'name': decklist['deckname'], 'budget': decklist['budget'], 'cardlist': budgetlist})
         
-        salt = []
+        '''salt = []
         for decklist in masterlist:
             saltlist = []
             for deck_card in sorted(decklist['decklist'], key=lambda d: d['salt'], reverse=True):
                 if deck_card['salt'] >= .75:
                     saltlist.append(f"{deck_card['quantity']} {deck_card['cardname']} Salt Score: {deck_card['salt']:.2f}")
-            salt.append({'name': decklist['deckname'], 'saltscore': decklist['saltscore'], 'saltlist': saltlist})
+            salt.append({'name': decklist['deckname'], 'saltscore': decklist['saltscore'], 'saltlist': saltlist})'''
 
-        cedh = []
+        '''cedh = []
         for decklist in masterlist:
             cedhlist = []
             for deck_card in decklist['decklist']:
                 if deck_card['cedh'] == True:
                     cedhlist.append(deck_card['cardname'])
-            cedh.append({'name': decklist['deckname'], 'cedhcount': decklist['cedhcount'], 'cedhlist': cedhlist})
+            cedh.append({'name': decklist['deckname'], 'cedhcount': decklist['cedhcount'], 'cedhlist': cedhlist})'''
 
         session['budgets'] = budgets
-        session['salt'] = salt
-        session['cedh'] = cedh
+        '''session['salt'] = salt
+        session['cedh'] = cedh'''
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
@@ -381,7 +381,7 @@ def comparison_test(deck_urls):
             if nosuggestion == True:
                 suggestions.append("Players could consider switching to decks with more similar budgets")
         
-        sorted_decks = sorted(masterlist, key=lambda d: d['saltscore'])
+        '''sorted_decks = sorted(masterlist, key=lambda d: d['saltscore'])
         if sorted_decks[-1]['saltscore'] - sorted_decks[0]['saltscore'] >= 20:
             imbalanced = True
             nosuggestion = True
@@ -392,9 +392,9 @@ def comparison_test(deck_urls):
                 nosuggestion = False
                 suggestions.append(f"{sorted_decks[0]['deckname']} could consider switching to a deck with more stax, control, or combo potential")
             if nosuggestion == True:
-                suggestions.append("Players could consider switching to decks that are have similar levels of stax, control, or combo potential")
+                suggestions.append("Players could consider switching to decks that are have similar levels of stax, control, or combo potential")'''
                             
-        sorted_decks = sorted(masterlist, key=lambda d: d['mv'])                
+        '''sorted_decks = sorted(masterlist, key=lambda d: d['mv'])                
         if sorted_decks[-1]['mv'] - sorted_decks[0]['mv'] >= 1:
             imbalanced = True
             nosuggestion = True
@@ -405,9 +405,9 @@ def comparison_test(deck_urls):
                 nosuggestion = False
                 suggestions.append(f"{sorted_decks[0]['deckname']} could consider switching to a slower deck")
             if nosuggestion == True:
-                suggestions.append("Players could consider switching to decks with more similar speeds")
+                suggestions.append("Players could consider switching to decks with more similar speeds")'''
 
-        sorted_decks = sorted(masterlist, key=lambda d: d['cedhcount'])
+        '''sorted_decks = sorted(masterlist, key=lambda d: d['cedhcount'])
         if sorted_decks[-1]['cedhcount'] - sorted_decks[0]['cedhcount'] >= 20:
             imbalanced = True
             nosuggestion = True
@@ -418,7 +418,7 @@ def comparison_test(deck_urls):
                 nosuggestion = False
                 suggestions.append(f"{sorted_decks[0]['deckname']} could consider switching to a more competitive deck")
             if nosuggestion == True:
-                suggestions.append("Players could consider switching to decks with more similar levels of competitive cards")
+                suggestions.append("Players could consider switching to decks with more similar levels of competitive cards")'''
                                 
         if imbalanced == False:
             suggestions.append("All decks seem balanced based on their budgets, salt scores, mana values, and number of competitive level cards")
@@ -510,7 +510,7 @@ def get_list(deck_urls):
 
 
 def deck_analysis(masterlist):
-    with open('quickatomic.json', 'r') as f:
+    '''with open('quickatomic.json', 'r') as f:
         file = json.load(f)
         for decklist in masterlist:
             deck_mv = 0
@@ -538,12 +538,12 @@ def deck_analysis(masterlist):
                     saltiest_card_value = salt
                     saltiest_cardname = cardname
                 total_salt += (salt * int(quantity))
-            decklist.update({'mv': float(deck_mv / (cardcount - landcount)), 'saltscore': total_salt, 'saltiestcard': saltiest_cardname, 'saltiestvalue': saltiest_card_value})
+            decklist.update({'mv': float(deck_mv / (cardcount - landcount)), 'saltscore': total_salt, 'saltiestcard': saltiest_cardname, 'saltiestvalue': saltiest_card_value})'''
     return masterlist
 
 
 def cedhtest(masterlist):
-    cedh_url = 'https://www.moxfield.com/decks/0DDiZV77lkSqfVAm8eCllg'
+    '''cedh_url = 'https://www.moxfield.com/decks/0DDiZV77lkSqfVAm8eCllg'
     cedh_cards = mtg_parser.parse_deck(cedh_url)
     cedh_staples = []
     for cedh_card in cedh_cards:
@@ -560,7 +560,7 @@ def cedhtest(masterlist):
                 overlap += int(quantity)
             else:
                 card.update({'cedh': False})
-        decklist.update({'cedhcount': overlap})
+        decklist.update({'cedhcount': overlap})'''
     return masterlist
 
 
