@@ -1,15 +1,3 @@
-blinker
-certifi
-charset-normalizer
-click
-colorama
 Flask
-gunicorn
-idna
-itsdangerous
-Jinja2
-MarkupSafe
-packaging
+Gunicorn
 requests
-urllib3
-Werkzeug
