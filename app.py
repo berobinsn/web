@@ -169,7 +169,8 @@ def get_your_deck(url):
 
     try:
         for card in cards:
-            if commander_match := re.search(r".* \[commander\]$", str(card)):
+            commander_match = re.search(r".* \[commander\]$", str(card))
+            if commander_match:
                 name = re.sub(r" \[commander\]$", "", unidecode(str(card)))
                 name = re.sub(r" \d+$", "", name)
                 name = re.sub(r" \(\w\w\w\w?\w?\)$", "", name)
