@@ -56,11 +56,11 @@ def talion():
                 top_cards.append(cardlist[i]['name'])     
             i += 1
 
-        '''url = 'https://mtgjson.com/api/v5/AtomicCards.json'
+        url = 'https://mtgjson.com/api/v5/AtomicCards.json'
         response = requests.get(url)
         file = json.loads(response.text)
         values = []
-        for card in top_cards:
+        '''for card in top_cards:
             try:
                 mv = file['data'][card][0]['manaValue']
                 values.append(int(mv))
