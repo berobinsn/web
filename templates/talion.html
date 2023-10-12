@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
+        <link href="static/styles.css" rel="stylesheet">
+        <title>My Webpage</title>
+    </head>
+    <body>
+      <div class="banner">
+        <nav class="navbar navbar-expand-lg bg-light">
+            <div class="container-fluid">
+              <a class="navbar-brand" href="#">Blake Everett Robinson</a>
+              <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+              </button>
+              <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                  <ul>
+                    <li><a class="nav-link" href="/">Home</a></li>
+                    <li><a class="nav-link" href="/about">About Me</a></li>
+                    <li><a class="nav-link active" aria-current="page" href="/mtg_projects">MTG Projects</a></li>
+                    <li><a class="nav-link" href="/other_projects">Other Projects</a></li>
+                    <li><a class="nav-link" href="/contact">Contact</a></li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </nav>
+        </div>
+        <div class="content">
+            <h2>Talion Calculator</h2>
+            <p>Analyze the top X cards played based on edhREC's data</p>
+            <form action="#" method="post" id="submit-form">
+                <div class="mb-3">
+                    <input autocomplete="off" autofocus class="form-control mx-auto w-auto" id="quantity" name="quantity" placeholder="Quantity" type="number">
+                </div>
+                <input type="submit" class="btn btn-primary" style="color: #555555" value="Submit" id="submit-button"></button>
+            </form>
+            {% if error %}
+                <p style="color:crimson"><strong>Error:</strong> {{ error }}</p>
+            {% endif %}
+            <a href="https://www.youtube.com/watch?v=Pq9AUr59ttw" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Talion Calculator Demo</a>
+            <br>
+            <a href="https://www.youtube.com/watch?v=swV7UMvC76E" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Talion Calculator Code Walkthrough</a>
+        </div>
+        <script>
+          document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("submit-form");
+            const submitButton = document.getElementById("submit-button"); 
+        
+            form.addEventListener("submit", function (event) {
+              // Disable the submit button
+              submitButton.disabled = true;
+        
+              // You can also change the button text to provide feedback to the user (optional)
+              submitButton.value = "Calculating";
+              submitButton.style.color = "f0f0f0";
+        
+              // Perform any additional actions or form submission logic here
+              // For example, you can use AJAX to submit the form data asynchronously.
+            });
+          });
+        </script>
+    </body>
+</html>
