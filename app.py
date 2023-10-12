@@ -56,34 +56,33 @@ def talion():
                 top_cards.append(cardlist[i]['name'])     
             i += 1
 
-        url = 'https://mtgjson.com/api/v5/AtomicCards.json'
-        response = requests.get(url)
-        file = json.loads(response.text)
-        values = []
-        '''for card in top_cards:
-            try:
-                mv = file['data'][card][0]['manaValue']
-                values.append(int(mv))
-                if 'Creature' in file['data'][card][0]['types'] or 'Vehicle' in file['data'][card][0]['types']:
-                    try:
-                        power = int(file['data'][card][0]['power'])
-                        if power != mv:
-                            values.append(power)
-                    except ValueError:
-                        pass
-                    try:
-                        toughness = int(file['data'][card][0]['toughness'])
-                        if toughness != mv and toughness != power:
-                            values.append(toughness)
-                    except ValueError:
-                        pass
-            except KeyError:
-                pass
         results = []
-        for number in range(max(values) + 1):
-            results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})'''
+        with open('quickatomic.json', 'r') as f:
+            file = json.load(f)
+            values = []
+            for card in top_cards:
+                try:
+                    mv = file[card]['manaValue']
+                    values.append(int(mv))
+                    if 'Creature' in file[card]['types'] or 'Vehicle' in file['data'][card]['types']:
+                        try:
+                            power = int(file[card]['power'])
+                            if power != mv:
+                                values.append(power)
+                        except ValueError:
+                            pass
+                        try:
+                            toughness = int(file[card]['toughness'])
+                            if toughness != mv and toughness != power:
+                                values.append(toughness)
+                        except ValueError:
+                            pass
+                except KeyError:
+                    pass
+            for number in range(max(values) + 1):
+                results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})
 
-        return render_template("talion_results.html", quantity=f"{quantity:,}", top_cards=top_cards)
+        return render_template("talion_results.html", quantity=f"{quantity:,}", results=results)
     else:
         return render_template("talion.html")
 
