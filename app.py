@@ -48,7 +48,7 @@ def talion():
         cardlist = edhrec_file['cardlist']
         top_cards = []
 
-        '''i = 0
+        i = 0
         while len(top_cards) < quantity:
             try:
                 top_cards.append(f"{cardlist[i]['cards'][0]['name']} // {cardlist[i]['cards'][1]['name']}")
@@ -56,7 +56,7 @@ def talion():
                 top_cards.append(cardlist[i]['name'])     
             i += 1
 
-        url = 'https://mtgjson.com/api/v5/AtomicCards.json'
+        '''url = 'https://mtgjson.com/api/v5/AtomicCards.json'
         response = requests.get(url)
         file = json.loads(response.text)
         values = []
@@ -83,7 +83,7 @@ def talion():
         for number in range(max(values) + 1):
             results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})'''
 
-        return render_template("talion_results.html", quantity=f"{quantity:,}")
+        return render_template("talion_results.html", quantity=f"{quantity:,}", top_cards=top_cards)
     else:
         return render_template("talion.html")
 

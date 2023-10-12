@@ -32,6 +32,9 @@
         <div class="content">
             <h2>Talion Calculator Results</h2>
             <h3>Top {{ quantity }} cards</h3>
+            {% for card in top_cards %}
+              <li>{{ card }}</li>
+            {% endfor %}
         </div>
     </body>
 </html>
