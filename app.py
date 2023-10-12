@@ -42,7 +42,7 @@ def talion():
             error = 'Invalid quantity'
             return render_template("talion.html", error=error)
                 
-        edhrec_url = 'https://json.edhrec.com/pages/top/year.json'
+        '''edhrec_url = 'https://json.edhrec.com/pages/top/year.json'
         edhrec_response = requests.get(edhrec_url)
         edhrec_file = json.loads(edhrec_response.text)
         cardlist = edhrec_file['cardlist']
@@ -81,9 +81,9 @@ def talion():
                 pass
         results = []
         for number in range(max(values) + 1):
-            results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})
+            results.append({'number': number, 'count': values.count(number), 'percentage': f"{values.count(number)/len(values)*100: .2f}"})'''
 
-        return render_template("talion_results.html", quantity=f"{quantity:,}", results=results)
+        return render_template("talion_results.html")
     else:
         return render_template("talion.html")
 
