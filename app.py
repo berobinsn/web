@@ -42,13 +42,13 @@ def talion():
             error = 'Invalid quantity'
             return render_template("talion.html", error=error)
                 
-        '''edhrec_url = 'https://json.edhrec.com/pages/top/year.json'
+        edhrec_url = 'https://json.edhrec.com/pages/top/year.json'
         edhrec_response = requests.get(edhrec_url)
         edhrec_file = json.loads(edhrec_response.text)
         cardlist = edhrec_file['cardlist']
         top_cards = []
 
-        i = 0
+        '''i = 0
         while len(top_cards) < quantity:
             try:
                 top_cards.append(f"{cardlist[i]['cards'][0]['name']} // {cardlist[i]['cards'][1]['name']}")
