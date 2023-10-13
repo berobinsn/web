@@ -190,7 +190,7 @@ def comparisons():
         
         suggestions = get_suggestions(masterlist)
         
-        for decklist in masterlist:
+        '''for decklist in masterlist:
             decklist['budget'] = f"{decklist['budget']:.2f}"
             decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
@@ -217,7 +217,7 @@ def comparisons():
 
         session['budgets'] = budgets
         session['salt'] = salt
-        session['cedh'] = cedh
+        session['cedh'] = cedh'''
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
