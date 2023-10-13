@@ -45,12 +45,12 @@
                 <tbody>
                     {% for list in masterlist %}
                         <tr>
-                            <td>{{ list['deckname'] }}</td>
+                            <td>{{ list['commander_name'] }}</td>
                             <td>${{ list['budget'] }}</td>
                             <td>{{ list['saltscore'] }}</td>
-                            <td>{{ list['saltiestcard'] }} at {{ list['saltiestvalue'] }}</td>
-                            <td>{{ list['mv'] }}</td>
-                            <td>{{ list['cedhcount'] }}</td>
+                            <td>{{ list['saltiest_cardname'] }} at {{ list['saltiest_value'] }}</td>
+                            <td>{{ list['avg_mv'] }}</td>
+                            <td>{{ list['cedh_count'] }}</td>
                         </tr>
                     {% endfor %}
                 </tbody>

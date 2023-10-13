@@ -34,10 +34,10 @@
             <h5><a href="/view_salt" style="color:rgb(213, 245, 255)">View Salt Data</a></h5>
             <h5><a href="/view_cedh" style="color:rgb(213, 245, 255)">View Competitive Card Data</a></h5>
             {% for budget in budgets %}
-                <h2>{{ budget['name'] }} has a budget of ${{ budget['budget'] }} when looking at the cheapest printing of each card</h2>
+                <h2>{{ budget['commander_name'] }} has a budget of ${{ budget['budget'] }} when looking at the cheapest printing of each card</h2>
                 <ul id="remove">
-                    {% for card in budget['cardlist'] %}
-                        <li>{{ card }}</li>
+                    {% for card in budget['expensive_cards'] %}
+                        <li>{{ card['cardname'] }} {{ card['price'] }}</li>
                     {% endfor %}
                 </ul>
             {% endfor%}

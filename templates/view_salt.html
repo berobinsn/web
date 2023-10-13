@@ -34,11 +34,11 @@
             <h5><b><a href="/view_salt" style="color:rgb(165, 234, 255)">View Salt Data</a></b></h5>
             <h5><a href="/view_cedh" style="color:rgb(213, 245, 255)">View Competitive Card Data</a></h5>
             {% for list in salt %}
-                <h2>{{ list['name'] }} has a total salt score of {{ list['saltscore'] }}</h2>
+                <h2>{{ list['commander_name'] }} has a total salt score of {{ list['saltscore'] }}</h2>
                 <h4>Saltiest Cards:</h4>
                 <ul id="remove">
-                    {% for card in list['saltlist'] %}
-                        <li>{{ card }}</li>
+                    {% for card in list['saltiest_cards'] %}
+                        <li>{{ card['cardname'] }} {{ card['salt'] }}</li>
                     {% endfor %}
                 </ul>
             {% endfor%}

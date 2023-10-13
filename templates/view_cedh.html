@@ -34,9 +34,9 @@
             <h5><a href="/view_salt" style="color:rgb(213, 245, 255)">View Salt Data</a></h5>
             <h5><b><a href="/view_cedh" style="color:rgb(165, 234, 255)">View Competitive Card Data</a></b></h5>
             {% for list in cedh %}
-                <h2>{{ list['name'] }} has total of {{ list['cedhcount'] }} competitive level cards that appear of the cEDH staples database</h2>
+                <h2>{{ list['commander_name'] }} has total of {{ list['cedh_count'] }} competitive level cards that appear on the cEDH staples database</h2>
                 <ul id="remove">
-                    {% for card in list['cedhlist'] %}
+                    {% for card in list['cedh_cards'] %}
                         <li>{{ card }}</li>
                     {% endfor %}
                 </ul>
