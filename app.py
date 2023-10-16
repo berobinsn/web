@@ -165,30 +165,42 @@ def comparisons():
         form_submission = request.form['urls']
         urls = form_submission.split("\r\n")
         masterlist = []
-        budgets = []
-        salt = []
-        cedh = []
         for url in urls:
             commander_name, decklist, error = get_deckinfo(url)
             if error != None:
                 return render_template("comparisons.html", error=error)
-            budget, expensive_cards = get_budget(decklist)
-            saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
-            cedh_count, cedh_cards = cedh_test(decklist)
-            masterlist.append({
-                'commander_name': commander_name,
-                'budget': budget,
-                'saltscore': saltscore,
-                'saltiest_cardname': saltiest_cardname,
-                'saltiest_value': saltiest_value,
-                'avg_mv': avg_mv,
-                'cedh_count': cedh_count,
-                })
-            budgets.append({'commander_name': commander_name, 'budget': budget, 'expensive_cards': expensive_cards})
-            salt.append({'commander_name': commander_name, 'saltscore': saltscore, 'saltiest_cards': saltiest_cards})
-            cedh.append({'commander_name': commander_name, 'cedh_count': cedh_count, 'cedh_cards': cedh_cards})
+            masterlist.append({'commander_name': commander_name, 'url': url, 'decklist': decklist})
+        button_clicked = request.form['button_clicked']
+        if button_clicked == 'budget':
+            masterlist, suggestions = get_budget(masterlist)
+            for list in masterlist:
+                list['budget'] = f"{list['budget']:.2f}"
+                for card in list['expensive_cards']:
+                    card['price'] = f"{card['price']:.2f}"
+            return render_template("view_budget.html", masterlist=masterlist, suggestions=suggestions)
+        if button_clicked == 'info':
+            get_deckstats(masterlist)
+        if button_clicked == 'competitive':
+            cedh_test(masterlist)
+
         
-        suggestions = get_suggestions(masterlist)
+        '''budget, expensive_cards = get_budget(decklist)
+        saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
+        cedh_count, cedh_cards = cedh_test(decklist)
+        masterlist.append({
+            'commander_name': commander_name,
+            'budget': budget,
+            'saltscore': saltscore,
+            'saltiest_cardname': saltiest_cardname,
+            'saltiest_value': saltiest_value,
+            'avg_mv': avg_mv,
+            'cedh_count': cedh_count,
+            })
+        budgets.append({'commander_name': commander_name, 'budget': budget, 'expensive_cards': expensive_cards})
+        salt.append({'commander_name': commander_name, 'saltscore': saltscore, 'saltiest_cards': saltiest_cards})
+        cedh.append({'commander_name': commander_name, 'cedh_count': cedh_count, 'cedh_cards': cedh_cards})'''
+        
+        '''suggestions = get_suggestions(session['masterlist'])'''
         
         '''for decklist in masterlist:
             decklist['budget'] = f"{decklist['budget']:.2f}"
@@ -219,7 +231,7 @@ def comparisons():
         session['salt'] = salt
         session['cedh'] = cedh'''
 
-        return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
+        '''return render_template("comparison_results.html", masterlist=session['masterlist'], suggestions=suggestions)'''
     else:
         return render_template("comparisons.html")
     
@@ -231,8 +243,7 @@ def comparison_results():
 
 @app.route("/view_budget")
 def view_budget():
-    budgets = session.get('budgets', [])
-    return render_template("view_budget.html", budgets=budgets)
+    return render_template("view_budget.html")
 
 
 @app.route("/view_salt")
@@ -411,47 +422,67 @@ def get_deckinfo(url):
     return commander_name, decklist, error
 
 
-def get_budget(decklist):
-    budget = 0
-    expensive_cards = []
+def get_budget(masterlist):
+    session.clear()
     with open('quickpricing.json', 'r') as f:
         file = json.load(f)
-        
-        for card in decklist:
-            uuids = []
-            if card['cardname'] in ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']:
-                uuids.append('None')
-            else:
-                card_uuids = Card.where(name=card['cardname']).all()
-                for card_uuid in card_uuids:
-                    if card_uuid.name == card['cardname']:
-                        uuids.append(card_uuid.id)
-                if len(uuids) == 0:
+        for list in masterlist:
+            budget = 0
+            expensive_cards = []
+            for card in list['decklist']:
+                uuids = []
+                if card['cardname'] in ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']:
+                    uuids.append('None')
+                else:
+                    card_uuids = Card.where(name=card['cardname']).all()
                     for card_uuid in card_uuids:
-                        uuids.append(card_uuid.id)
-            prices = []
-            if 'None' in uuids:
-                prices.append(0)
-            else:
-                for id in uuids:
-                    try:
-                        price = file[id]['normal']
-                        prices.append(price)
-                    except KeyError:
-                        pass
-                    try:
-                        price = file[id]['foil']
-                        prices.append(price)
-                    except  KeyError:
-                        pass
-            if len(prices) == 0:
-                prices.append(0)
-            cheapest_printing = min(prices)
-            if cheapest_printing >= 5:
-                expensive_cards.append({'cardname': card['cardname'], 'price': cheapest_printing})
-            budget += cheapest_printing * card['quantity']
-    
-    return budget, expensive_cards
+                        if card_uuid.name == card['cardname']:
+                            uuids.append(card_uuid.id)
+                    if len(uuids) == 0:
+                        for card_uuid in card_uuids:
+                            uuids.append(card_uuid.id)
+                prices = []
+                if 'None' in uuids:
+                    prices.append(0)
+                else:
+                    for id in uuids:
+                        try:
+                            price = file[id]['normal']
+                            prices.append(price)
+                        except KeyError:
+                            pass
+                        try:
+                            price = file[id]['foil']
+                            prices.append(price)
+                        except  KeyError:
+                            pass
+                if len(prices) == 0:
+                    prices.append(0)
+                cheapest_printing = min(prices)
+                if cheapest_printing >= 5:
+                    expensive_cards.append({'cardname': card['cardname'], 'price': cheapest_printing})
+                budget += cheapest_printing * card['quantity']
+            list.update({'budget': budget, 'expensive_cards': sorted(expensive_cards, key=lambda d: d['price'], reverse=True)})
+    suggestions = []
+    imbalanced = False
+    if len(masterlist) > 1:
+        sorted_decks = sorted(masterlist, key=lambda d: d['budget'])
+        if sorted_decks[-1]['budget'] - sorted_decks[0]['budget'] >= 250:
+            imbalanced = True
+            nosuggestion = True
+            if sorted_decks[-1]['budget'] - sorted_decks[-2]['budget'] >= 125:
+                nosuggestion = False
+                suggestions.append(f"{sorted_decks[-1]['commander_name']} could consider switching to a more budget deck")
+            if sorted_decks[1]['budget'] - sorted_decks[0]['budget'] >= 125:
+                nosuggestion = False
+                suggestions.append(f"{sorted_decks[0]['commander_name']} could consider switching to a more expensive deck")
+            if nosuggestion == True:
+                suggestions.append("Players could consider switching to decks with more similar budgets")
+        if imbalanced == False:
+            suggestions.append("All decks seem balanced based on their budgets, salt scores, mana values, and number of competitive level cards")
+    else:
+        suggestions.append("Enter multiple decklists to see if they are balanced, or if the program detects any imbalances")
+    return masterlist, suggestions
 
 
 def get_deckstats(decklist):

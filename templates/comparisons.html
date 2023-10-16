@@ -37,7 +37,10 @@
                 <div class="form-group">
                     <textarea class="form-control" autocomplete="off" id="urls" name="urls" placeholder="e.g. https://www.moxfield.com/decks/abc123" rows="4"></textarea>
                 </div>
-                <input type="submit" class="btn btn-primary" style="color: #555555" value="Submit" id="submit-button"></input>
+                <input type="hidden" name="button_clicked" id="button_clicked" value="" /> <!-- Hidden input for button value -->
+                <button type="submit" class="btn btn-primary" style="color: #555555; width: 200px" onclick="setButtonValue('budget-button')">Compare Budget</button>
+                <button type="submit" class="btn btn-primary" style="color: #555555; width: 200px" onclick="setButtonValue('info-button')">Compare Deck Info</button>
+                <button type="submit" class="btn btn-primary" style="color: #555555; width: 200px" onclick="setButtonValue('competitive-button')">Compare Competitive</button>
             </form>
             {% if error %}
                 <p style="color:crimson"><strong>Error:</strong> {{ error }}</p>
@@ -47,22 +50,26 @@
             <a href="https://www.youtube.com/watch?v=PuOCvRZSqns" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Deck Comparisons Code Walkthrough</a>
         </div>
         <script>
-          document.addEventListener("DOMContentLoaded", function () {
-            const form = document.getElementById("submit-form");
-            const submitButton = document.getElementById("submit-button");
-        
-            form.addEventListener("submit", function (event) {
-              // Disable the submit button
-              submitButton.disabled = true;
-        
-              // You can also change the button text to provide feedback to the user (optional)
-              submitButton.value = "Calculating";
-              submitButton.style.color = "f0f0f0";
-        
-              // Perform any additional actions or form submission logic here
-              // For example, you can use AJAX to submit the form data asynchronously.
-            });
-          });
-        </script>
+          function setButtonValue(buttonId) {
+              const hiddenInput = document.getElementById("button_clicked");
+              const button = document.getElementById(buttonId);
+      
+              // Set the value of the hidden input to a unique value based on the button clicked
+              if (buttonId === 'budget-button') {
+                  hiddenInput.value = 'budget';
+              } else if (buttonId === 'info-button') {
+                  hiddenInput.value = 'info';
+              } else if (buttonId === 'competitive-button') {
+                  hiddenInput.value = 'competitive';
+              }
+      
+              // Optionally, you can change the button text to provide feedback to the user
+              button.textContent = "Calculating";
+              button.style.color = "#f0f0f0";
+      
+              // Submit the form
+              document.getElementById("submit-form").submit();
+          }
+      </script>
     </body>
 </html>
