@@ -172,12 +172,12 @@ def comparisons():
             masterlist.append({'commander_name': commander_name, 'url': url, 'decklist': decklist})
         button_clicked = request.form['button_clicked']
         if button_clicked == 'budget':
-            masterlist, suggestions = get_budget(masterlist)
-            for list in masterlist:
+            budget_list, suggestions = get_budget(masterlist)
+            for list in budget_list:
                 list['budget'] = f"{list['budget']:.2f}"
                 for card in list['expensive_cards']:
                     card['price'] = f"{card['price']:.2f}"
-            return render_template("view_budget.html", masterlist=masterlist, suggestions=suggestions)
+            return render_template("view_budget.html", budget_list=budget_list, suggestions=suggestions)
         if button_clicked == 'info':
             get_deckstats(masterlist)
         if button_clicked == 'competitive':
@@ -426,6 +426,8 @@ def get_budget(masterlist):
     session.clear()
     with open('quickpricing.json', 'r') as f:
         file = json.load(f)
+        expensive_list = []
+        budget_list = []
         for list in masterlist:
             budget = 0
             expensive_cards = []
@@ -462,11 +464,11 @@ def get_budget(masterlist):
                 if cheapest_printing >= 5:
                     expensive_cards.append({'cardname': card['cardname'], 'price': cheapest_printing})
                 budget += cheapest_printing * card['quantity']
-            list.update({'budget': budget, 'expensive_cards': sorted(expensive_cards, key=lambda d: d['price'], reverse=True)})
+            budget_list.append({'commander_name': list['commander_name'], 'budget': budget, 'expensive_cards': sorted(expensive_cards, key=lambda d: d['price'], reverse=True)})
     suggestions = []
     imbalanced = False
     if len(masterlist) > 1:
-        sorted_decks = sorted(masterlist, key=lambda d: d['budget'])
+        sorted_decks = sorted(budget_list, key=lambda d: d['budget'])
         if sorted_decks[-1]['budget'] - sorted_decks[0]['budget'] >= 250:
             imbalanced = True
             nosuggestion = True
@@ -482,7 +484,7 @@ def get_budget(masterlist):
             suggestions.append("All decks seem balanced based on their budgets, salt scores, mana values, and number of competitive level cards")
     else:
         suggestions.append("Enter multiple decklists to see if they are balanced, or if the program detects any imbalances")
-    return masterlist, suggestions
+    return budget_list, suggestions
 
 
 def get_deckstats(decklist):

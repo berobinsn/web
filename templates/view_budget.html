@@ -42,7 +42,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for list in masterlist %}
+                    {% for list in budget_list %}
                         <tr>
                             <td>{{ list['commander_name'] }}</td>
                             <td>${{ list['budget'] }}</td>
@@ -55,7 +55,7 @@
                 <p>{{ suggestion }}</p>
             {% endfor %}
             <br>
-            {% for list in masterlist %}
+            {% for list in budget_list %}
                 <h2>{{ list['commander_name'] }} has a budget of ${{ list['budget'] }} when looking at the cheapest printing of each card</h2>
                 <ul id="remove">
                     {% for card in list['expensive_cards'] %}
