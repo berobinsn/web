@@ -211,11 +211,13 @@ def comparisons():
             decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
             decklist['avg_mv'] = f"{decklist['avg_mv']:.2f}"
+        
+        for item in cedh:
+            for card in item['cedh_cards']:
+                print(card)
 
         session['salt'] = salt
         session['cedh'] = cedh
-        for card in session['cedh']:
-            print(card)
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
