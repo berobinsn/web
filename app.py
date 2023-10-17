@@ -211,11 +211,11 @@ def comparisons():
             decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
             decklist['avg_mv'] = f"{decklist['avg_mv']:.2f}"
+        for saltscore in salt:
+            saltscore['saltscore'] = f"{saltscore['saltscore']:.2f}"
 
         session['salt'] = salt
-        print(session['salt'])
         session['cedh'] = cedh
-        print(session['cedh'])
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
@@ -498,8 +498,6 @@ def cedh_test(decklist):
         cedh_cardname = re.sub(r"^1 ", "", str(cedh_card))
         cedh_cardname = re.sub(r" \(\w\w\w\w?\w?\).*$", "", cedh_cardname)
         cedh_staples.append(cedh_cardname)
-    print("cedh staples:")
-    print(cedh_staples)
     
     overlap = 0
     cedh_list = []
