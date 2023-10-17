@@ -186,15 +186,16 @@ def comparisons():
         urls = form_submission.split("\r\n")
         print("URLS collected")
         masterlist = []
+        salt = []
+        cedh = []
         for url in urls:
             commander_name, decklist, error = get_deckinfo(url)
             print("Deck info collected")
             if error != None:
                 return render_template("comparisons.html", error=error)
             saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
-            print("Deck Stats collected")
             cedh_count, cedh_cards = cedh_test(decklist)
-            print("cedh Collected")
+            del decklist
             masterlist.append({
                 'commander_name': commander_name,
                 'saltscore': saltscore,
@@ -202,10 +203,10 @@ def comparisons():
                 'saltiest_value': saltiest_value,
                 'avg_mv': avg_mv,
                 'cedh_count': cedh_count,
-                'saltiest_cards': saltiest_cards,
-                'cedh_cards': cedh_cards
                 })
-
+            salt.append({'commander_name': commander_name, 'saltiest_cards': saltiest_cards})
+            cedh.append({'commander_name': commander_name, 'cedh_cards': cedh_cards})
+            del commander_name, saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards, cedh_count, cedh_cards
         suggestions = get_suggestions(masterlist)
         
         for decklist in masterlist:
@@ -213,7 +214,8 @@ def comparisons():
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
             decklist['avg_mv'] = f"{decklist['avg_mv']:.2f}"
 
-        session['masterlist'] = masterlist
+        session['salt'] = salt
+        session['cedh'] = cedh
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
@@ -232,14 +234,14 @@ def view_budget():
 
 @app.route("/view_salt")
 def view_salt():
-    masterlist = session.get('masterlist', [])
-    return render_template("view_salt.html", masterlist=masterlist)
+    salt = session.get('salt', [])
+    return render_template("view_salt.html", salt=salt)
 
 
 @app.route("/view_cedh")
 def view_cedh():
-    masterlist = session.get('masterlist', [])
-    return render_template("view_cedh.html", masterlist=masterlist)
+    cedh = session.get('cedh', [])
+    return render_template("view_cedh.html", cedh=cedh)
 
 
 def get_your_deck(url):
