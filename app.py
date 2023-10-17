@@ -184,13 +184,11 @@ def comparisons():
         session.clear()
         form_submission = request.form['urls']
         urls = form_submission.split("\r\n")
-        print("URLS collected")
         masterlist = []
         salt = []
         cedh = []
         for url in urls:
             commander_name, decklist, error = get_deckinfo(url)
-            print("Deck info collected")
             if error != None:
                 return render_template("comparisons.html", error=error)
             saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
@@ -204,8 +202,8 @@ def comparisons():
                 'avg_mv': avg_mv,
                 'cedh_count': cedh_count,
                 })
-            salt.append({'commander_name': commander_name, 'saltiest_cards': saltiest_cards})
-            cedh.append({'commander_name': commander_name, 'cedh_cards': cedh_cards})
+            salt.append({'commander_name': commander_name, 'saltscore': saltscore, 'saltiest_cards': saltiest_cards})
+            cedh.append({'commander_name': commander_name, 'cedh_count': cedh_count, 'cedh_cards': cedh_cards})
             del commander_name, saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards, cedh_count, cedh_cards
         suggestions = get_suggestions(masterlist)
         
@@ -216,6 +214,8 @@ def comparisons():
 
         session['salt'] = salt
         session['cedh'] = cedh
+        for card in session['cedh']:
+            print(card)
 
         return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
