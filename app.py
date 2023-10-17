@@ -496,6 +496,7 @@ def cedh_test(decklist):
     cedh_staples = []
     for cedh_card in cedh_cards:
         cedh_cardname = re.sub(r"^1 ", "", str(cedh_card))
+        cedh_cardname = re.sub(r" \(\w\w\w\w?\w?\).*$", "", cedh_cardname)
         cedh_staples.append(cedh_cardname)
     print("cedh staples:")
     print(cedh_staples)
