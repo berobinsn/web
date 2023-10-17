@@ -33,7 +33,7 @@
             <h2>Budget Comparisons</h2>
               <h2>{{ commander_name }} has a budget of ${{ budget }} when looking at the cheapest printing of each card</h2>
               <ul id="remove">
-                  {% for card in expensive_cards %}
+                  {% for card in decklist %}
                       <li>{{ card['cardname'] }} ${{ card['price'] }}</li>
                   {% endfor %}
               </ul>

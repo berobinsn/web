@@ -166,12 +166,12 @@ def budget():
         commander_name, decklist, error = get_deckinfo(url)
         if error != None:
             return render_template("budget.html", error=error)
-        budget, expensive_cards = get_budget(decklist)
+        budget, decklist = get_budget(decklist)
         return render_template(
             "budget_results.html",
             commander_name=commander_name,
             budget=budget,
-            expensive_cards=expensive_cards
+            decklist=decklist
             )
 
     else:
