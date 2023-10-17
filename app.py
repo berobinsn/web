@@ -212,9 +212,10 @@ def comparisons():
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
             decklist['avg_mv'] = f"{decklist['avg_mv']:.2f}"
         
+        print("hello")
         for item in cedh:
             for card in item['cedh_cards']:
-                print(card)
+                print("card: ", card)
 
         session['salt'] = salt
         session['cedh'] = cedh
