@@ -497,6 +497,8 @@ def cedh_test(decklist):
     for cedh_card in cedh_cards:
         cedh_cardname = re.sub(r"^1 ", "", str(cedh_card))
         cedh_staples.append(cedh_cardname)
+    print("cedh staples:")
+    print(cedh_staples)
     
     overlap = 0
     cedh_list = []
