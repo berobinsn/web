@@ -35,7 +35,6 @@
                 <thead>
                     <tr>
                         <th scope="col">Deck Name</th>
-                        <th scope="col">Cheapest Printing Budget</th>
                         <th scope="col">Salt Score</th>
                         <th scope="col">Saltiest Card</th>
                         <th scope="col">Average Mana Value</th>
@@ -46,7 +45,6 @@
                     {% for list in masterlist %}
                         <tr>
                             <td>{{ list['commander_name'] }}</td>
-                            <td>${{ list['budget'] }}</td>
                             <td>{{ list['saltscore'] }}</td>
                             <td>{{ list['saltiest_cardname'] }} at {{ list['saltiest_value'] }}</td>
                             <td>{{ list['avg_mv'] }}</td>
@@ -60,7 +58,6 @@
                 <p>{{ suggestion }}</p>
             {% endfor %}
             <br>
-            <h5><a href="/view_budget" style="color:rgb(213, 245, 255)">View Budget Data</a></h5>
             <h5><a href="/view_salt" style="color:rgb(213, 245, 255)">View Salt Data</a></h5>
             <h5><a href="/view_cedh" style="color:rgb(213, 245, 255)">View Competitive Card Data</a></h5>
         </div>

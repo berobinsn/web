@@ -30,10 +30,9 @@
           </nav>
         </div>
         <div class="content1">
-            <h5><a href="/view_budget" style="color:rgb(213, 245, 255)">View Budget Data</a></h5>
             <h5><a href="/view_salt" style="color:rgb(213, 245, 255)">View Salt Data</a></h5>
             <h5><b><a href="/view_cedh" style="color:rgb(165, 234, 255)">View Competitive Card Data</a></b></h5>
-            {% for list in cedh %}
+            {% for list in masterlist %}
                 <h2>{{ list['commander_name'] }} has total of {{ list['cedh_count'] }} competitive level cards that appear on the cEDH staples database</h2>
                 <ul id="remove">
                     {% for card in list['cedh_cards'] %}

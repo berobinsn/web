@@ -5,7 +5,7 @@
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
         <link href="static/styles.css" rel="stylesheet">
-        <title>My Webpage</title> 
+        <title>My Webpage</title>
     </head>
     <body>
       <div class="banner">
@@ -30,21 +30,23 @@
           </nav>
         </div>
         <div class="content">
-            <h2>EDH Deck Comparisons</h2>
-            <p>input decklist URLs, 1 per line, and hit submit</p>
-            <p>Supported deckbuilding websites are Aetherhub, Archidekt, DeckStats, Moxfield, MTGGoldfish, Scryfall, TappedOut, and TCGPlayer</p>
-            <form action="#" method="post" id="submit-form">
-                <div class="form-group">
-                    <textarea class="form-control" autocomplete="off" id="urls" name="urls" placeholder="e.g. https://www.moxfield.com/decks/abc123" rows="4"></textarea>
-                </div>
-                <input type="submit" class="btn btn-primary" style="color: #555555" value="Submit" id="submit-button"></input>
-            </form>
-            {% if error %}
-                <p style="color:crimson"><strong>Error:</strong> {{ error }}</p>
-            {% endif %}
-            <a href="https://www.youtube.com/watch?v=SaLlWaYS1Eo" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Deck Comparisons Demo</a>
-            <br>
-            <a href="https://www.youtube.com/watch?v=PuOCvRZSqns" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Deck Comparisons Code Walkthrough</a>
+          <h2>EDH Cheapest Budget Calculator</h2>
+          <p>Takes a decklist URL, and scrubs TCGPlayer to find the cheapest printing available for each card in the list, and uses it to determine the budget of your deck</p>
+          <p>Supported deckbuilding websites are Aetherhub, Archidekt, DeckStats, Moxfield, MTGGoldfish, Scryfall, TappedOut, and TCGPlayer</p>
+          <form action="#" method="post" id="submit-form">
+              <div class="form-group">
+                  <textarea type="url" class="form-control" autocomplete="off" id="url" name="url" placeholder="e.g. https://www.moxfield.com/decks/abc123" rows="1"></textarea>
+              </div>
+              <input type="submit" class="btn btn-primary" style="color: #555555" value="Submit" id="submit-button"></input>
+          </form>
+          {% if error %}
+              <p style="color:crimson"><strong>Error:</strong> {{ error }}</p>
+          {% endif %}
+          <a href="https://www.youtube.com/watch?v=SaLlWaYS1Eo" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Budget Calculator Demo</a>
+          <br>
+          <a href="https://www.youtube.com/watch?v=PuOCvRZSqns" target="_blank" rel="noopener" style="color:rgb(213, 245, 255)">Budget Calculator Code Walkthrough</a>
+          <p>This program was broken out from the deck comparisons program due to extremely limited RAM from the free hosting service.<br>
+            As such, the walkthrough videos will redirect to the videos from the original program where this section is explained.</p>
         </div>
         <script>
           document.addEventListener("DOMContentLoaded", function () {
@@ -55,9 +57,12 @@
               // Disable the submit button
               submitButton.disabled = true;
         
+              // You can also change the button text to provide feedback to the user (optional)
               submitButton.value = "Calculating";
               submitButton.style.color = "f0f0f0";
         
+              // Perform any additional actions or form submission logic here
+              // For example, you can use AJAX to submit the form data asynchronously.
             });
           });
         </script>

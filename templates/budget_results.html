@@ -29,40 +29,14 @@
             </div>
           </nav>
         </div>
-        <div class="content1">
-            <h5><b><a href="/view_budget" style="color:rgb(165, 234, 255)">View Budget Data</a></b></h5>
-            <h5><a href="/view_salt" style="color:rgb(213, 245, 255)">View Salt Data</a></h5>
-            <h5><a href="/view_cedh" style="color:rgb(213, 245, 255)">View Competitive Card Data</a></h5>
+        <div class="content">
             <h2>Budget Comparisons</h2>
-            <table class="table table-dark">
-                <thead>
-                    <tr>
-                        <th scope="col">Deck Name</th>
-                        <th scope="col">Cheapest Printing Budget</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for list in budget_list %}
-                        <tr>
-                            <td>{{ list['commander_name'] }}</td>
-                            <td>${{ list['budget'] }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <h2>Suggestions</h2>
-            {% for suggestion in suggestions %}
-                <p>{{ suggestion }}</p>
-            {% endfor %}
-            <br>
-            {% for list in budget_list %}
-                <h2>{{ list['commander_name'] }} has a budget of ${{ list['budget'] }} when looking at the cheapest printing of each card</h2>
-                <ul id="remove">
-                    {% for card in list['expensive_cards'] %}
-                        <li>{{ card['cardname'] }} ${{ card['price'] }}</li>
-                    {% endfor %}
-                </ul>
-            {% endfor%}
+              <h2>{{ commander_name }} has a budget of ${{ budget }} when looking at the cheapest printing of each card</h2>
+              <ul id="remove">
+                  {% for card in expensive_cards %}
+                      <li>{{ card['cardname'] }} ${{ card['price'] }}</li>
+                  {% endfor %}
+              </ul>
         </div>
     </body>
 </html>

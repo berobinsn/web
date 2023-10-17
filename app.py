@@ -158,80 +158,64 @@ def view_lists():
                            overlap_edhrec_list=overlap_edhrec_list)
 
 
+@app.route('/budget', methods=["POST", "GET"])
+def budget():
+    if request.method == "POST":
+        session.clear()
+        url = request.form['url'].strip()
+        commander_name, decklist, error = get_deckinfo(url)
+        if error != None:
+            return render_template("budget.html", error=error)
+        budget, expensive_cards = get_budget(decklist)
+        return render_template(
+            "budget_results.html",
+            commander_name=commander_name,
+            budget=budget,
+            expensive_cards=expensive_cards
+            )
+
+    else:
+        return render_template("budget.html")
+
+
 @app.route('/comparisons', methods=["POST", "GET"])
 def comparisons():
     if request.method == "POST":
         session.clear()
         form_submission = request.form['urls']
         urls = form_submission.split("\r\n")
+        print("URLS collected")
         masterlist = []
         for url in urls:
             commander_name, decklist, error = get_deckinfo(url)
+            print("Deck info collected")
             if error != None:
                 return render_template("comparisons.html", error=error)
-            masterlist.append({'commander_name': commander_name, 'url': url, 'decklist': decklist})
-        button_clicked = request.form['button_clicked']
-        if button_clicked == 'budget':
-            budget_list, suggestions = get_budget(masterlist)
-            for list in budget_list:
-                list['budget'] = f"{list['budget']:.2f}"
-                for card in list['expensive_cards']:
-                    card['price'] = f"{card['price']:.2f}"
-            return render_template("view_budget.html", budget_list=budget_list, suggestions=suggestions)
-        if button_clicked == 'info':
-            get_deckstats(masterlist)
-        if button_clicked == 'competitive':
-            cedh_test(masterlist)
+            saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
+            print("Deck Stats collected")
+            cedh_count, cedh_cards = cedh_test(decklist)
+            print("cedh Collected")
+            masterlist.append({
+                'commander_name': commander_name,
+                'saltscore': saltscore,
+                'saltiest_cardname': saltiest_cardname,
+                'saltiest_value': saltiest_value,
+                'avg_mv': avg_mv,
+                'cedh_count': cedh_count,
+                'saltiest_cards': saltiest_cards,
+                'cedh_cards': cedh_cards
+                })
 
+        suggestions = get_suggestions(masterlist)
         
-        '''budget, expensive_cards = get_budget(decklist)
-        saltscore, saltiest_cardname, saltiest_value, avg_mv, saltiest_cards = get_deckstats(decklist)
-        cedh_count, cedh_cards = cedh_test(decklist)
-        masterlist.append({
-            'commander_name': commander_name,
-            'budget': budget,
-            'saltscore': saltscore,
-            'saltiest_cardname': saltiest_cardname,
-            'saltiest_value': saltiest_value,
-            'avg_mv': avg_mv,
-            'cedh_count': cedh_count,
-            })
-        budgets.append({'commander_name': commander_name, 'budget': budget, 'expensive_cards': expensive_cards})
-        salt.append({'commander_name': commander_name, 'saltscore': saltscore, 'saltiest_cards': saltiest_cards})
-        cedh.append({'commander_name': commander_name, 'cedh_count': cedh_count, 'cedh_cards': cedh_cards})'''
-        
-        '''suggestions = get_suggestions(session['masterlist'])'''
-        
-        '''for decklist in masterlist:
-            decklist['budget'] = f"{decklist['budget']:.2f}"
+        for decklist in masterlist:
             decklist['saltscore'] = f"{decklist['saltscore']:.2f}"
             decklist['saltiest_value'] = f"{decklist['saltiest_value']:.2f}"
             decklist['avg_mv'] = f"{decklist['avg_mv']:.2f}"
-        
-        for budget_list in budgets:
-            budget_list['budget'] = f"{budget_list['budget']:.2f}"
-            budget_list['expensive_cards'] = sorted(budget_list['expensive_cards'], key=lambda d: d['price'])
-            for card_price in budget_list['expensive_cards']:
-                card_price['price'] = f"${card_price['price']:.2f}"
-                print(card_price['cardname'], card_price['price'])
-        
-        for salt_list in salt:
-            salt_list['saltscore'] = f"{salt_list['saltscore']:.2f}"
-            salt_list['saltiest_cards'] = sorted(salt_list['saltiest_cards'], key=lambda d: d['salt'])
-            for salt_value in salt_list['saltiest_cards']:
-                salt_value['salt'] = f"{salt_value['salt']:.2f}"
-                print(salt_value['cardname'], salt_value['salt'])
-        
-        for cedh_list in cedh:
-            for cedh_card in cedh_list['cedh_cards']:
-                print(cedh_card)
-            
 
-        session['budgets'] = budgets
-        session['salt'] = salt
-        session['cedh'] = cedh'''
+        session['masterlist'] = masterlist
 
-        '''return render_template("comparison_results.html", masterlist=session['masterlist'], suggestions=suggestions)'''
+        return render_template("comparison_results.html", masterlist=masterlist, suggestions=suggestions)
     else:
         return render_template("comparisons.html")
     
@@ -241,21 +225,21 @@ def comparison_results():
     render_template("comparison_results.html")
 
 
-@app.route("/view_budget")
+@app.route("/budget_results")
 def view_budget():
-    return render_template("view_budget.html")
+    return render_template("budget_results.html")
 
 
 @app.route("/view_salt")
 def view_salt():
-    salt = session.get('salt', [])
-    return render_template("view_salt.html", salt=salt)
+    masterlist = session.get('masterlist', [])
+    return render_template("view_salt.html", masterlist=masterlist)
 
 
 @app.route("/view_cedh")
 def view_cedh():
-    cedh = session.get('cedh', [])
-    return render_template("view_cedh.html", cedh=cedh)
+    masterlist = session.get('masterlist', [])
+    return render_template("view_cedh.html", masterlist=masterlist)
 
 
 def get_your_deck(url):
@@ -422,69 +406,49 @@ def get_deckinfo(url):
     return commander_name, decklist, error
 
 
-def get_budget(masterlist):
-    session.clear()
+def get_budget(decklist):
     with open('quickpricing.json', 'r') as f:
         file = json.load(f)
-        expensive_list = []
-        budget_list = []
-        for list in masterlist:
-            budget = 0
-            expensive_cards = []
-            for card in list['decklist']:
-                uuids = []
-                if card['cardname'] in ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']:
-                    uuids.append('None')
-                else:
-                    card_uuids = Card.where(name=card['cardname']).all()
+        budget = 0
+        expensive_cards = []
+        for card in decklist:
+            uuids = []
+            if card['cardname'] in ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']:
+                uuids.append('None')
+            else:
+                card_uuids = Card.where(name=card['cardname']).all()
+                for card_uuid in card_uuids:
+                    if card_uuid.name == card['cardname']:
+                        uuids.append(card_uuid.id)
+                if len(uuids) == 0:
                     for card_uuid in card_uuids:
-                        if card_uuid.name == card['cardname']:
-                            uuids.append(card_uuid.id)
-                    if len(uuids) == 0:
-                        for card_uuid in card_uuids:
-                            uuids.append(card_uuid.id)
-                prices = []
-                if 'None' in uuids:
-                    prices.append(0)
-                else:
-                    for id in uuids:
-                        try:
-                            price = file[id]['normal']
-                            prices.append(price)
-                        except KeyError:
-                            pass
-                        try:
-                            price = file[id]['foil']
-                            prices.append(price)
-                        except  KeyError:
-                            pass
-                if len(prices) == 0:
-                    prices.append(0)
-                cheapest_printing = min(prices)
-                if cheapest_printing >= 5:
-                    expensive_cards.append({'cardname': card['cardname'], 'price': cheapest_printing})
+                        uuids.append(card_uuid.id)
+            prices = []
+            if 'None' in uuids:
+                prices.append(0)
+            else:
+                for id in uuids:
+                    try:
+                        price = file[id]['normal']
+                        prices.append(price)
+                    except KeyError:
+                        pass
+                    try:
+                        price = file[id]['foil']
+                        prices.append(price)
+                    except  KeyError:
+                        pass
+            if len(prices) == 0:
+                prices.append(0)
+            cheapest_printing = min(prices)
+            if cheapest_printing >= 5:
+                expensive_cards.append({'cardname': card['cardname'], 'price': cheapest_printing})
                 budget += cheapest_printing * card['quantity']
-            budget_list.append({'commander_name': list['commander_name'], 'budget': budget, 'expensive_cards': sorted(expensive_cards, key=lambda d: d['price'], reverse=True)})
-    suggestions = []
-    imbalanced = False
-    if len(masterlist) > 1:
-        sorted_decks = sorted(budget_list, key=lambda d: d['budget'])
-        if sorted_decks[-1]['budget'] - sorted_decks[0]['budget'] >= 250:
-            imbalanced = True
-            nosuggestion = True
-            if sorted_decks[-1]['budget'] - sorted_decks[-2]['budget'] >= 125:
-                nosuggestion = False
-                suggestions.append(f"{sorted_decks[-1]['commander_name']} could consider switching to a more budget deck")
-            if sorted_decks[1]['budget'] - sorted_decks[0]['budget'] >= 125:
-                nosuggestion = False
-                suggestions.append(f"{sorted_decks[0]['commander_name']} could consider switching to a more expensive deck")
-            if nosuggestion == True:
-                suggestions.append("Players could consider switching to decks with more similar budgets")
-        if imbalanced == False:
-            suggestions.append("All decks seem balanced based on their budgets, salt scores, mana values, and number of competitive level cards")
-    else:
-        suggestions.append("Enter multiple decklists to see if they are balanced, or if the program detects any imbalances")
-    return budget_list, suggestions
+        budget = f"{budget:.2f}"
+        expensive_cards = sorted(expensive_cards, key=lambda d: d['price'], reverse=True)
+        for card in expensive_cards:
+            card['price'] = f"{card['price']:.2f}"
+    return budget, expensive_cards
 
 
 def get_deckstats(decklist):
@@ -517,6 +481,9 @@ def get_deckstats(decklist):
                 saltiest_value = salt
             if salt >= .75:
                 saltiest_cards.append({'cardname': cardname, 'salt': salt})
+    saltiest_cards = sorted(saltiest_cards, key=lambda d: d['salt'], reverse=True)
+    for card in saltiest_cards:
+        card['salt'] = f"{card['salt']:.2f}"
 
     return saltscore, saltiest_cardname, saltiest_value, float(deck_mv / (cardcount - landcount)), saltiest_cards
 
@@ -542,20 +509,7 @@ def cedh_test(decklist):
 def get_suggestions(masterlist):
     suggestions = []
     imbalanced = False
-    if len(masterlist) > 1:
-        sorted_decks = sorted(masterlist, key=lambda d: d['budget'])
-        if sorted_decks[-1]['budget'] - sorted_decks[0]['budget'] >= 250:
-            imbalanced = True
-            nosuggestion = True
-            if sorted_decks[-1]['budget'] - sorted_decks[-2]['budget'] >= 125:
-                nosuggestion = False
-                suggestions.append(f"{sorted_decks[-1]['commander_name']} could consider switching to a more budget deck")
-            if sorted_decks[1]['budget'] - sorted_decks[0]['budget'] >= 125:
-                nosuggestion = False
-                suggestions.append(f"{sorted_decks[0]['commander_name']} could consider switching to a more expensive deck")
-            if nosuggestion == True:
-                suggestions.append("Players could consider switching to decks with more similar budgets")
-        
+    if len(masterlist) > 1:        
         sorted_decks = sorted(masterlist, key=lambda d: d['saltscore'])
         if sorted_decks[-1]['saltscore'] - sorted_decks[0]['saltscore'] >= 20:
             imbalanced = True
