@@ -268,6 +268,7 @@ def get_your_deck(url):
             sideboard = re.search(r".*\[.*sideboard.*\]$", str(card))
             if maybeboard == None and sideboard == None:
                 cardname = re.sub(r"^\d+x* ", "", unidecode(str(card)))
+                cardname = re.sub(r" // .*", "", cardname)
                 cardname = re.sub(r" \[.*\]$", "", cardname)
                 cardname = re.sub(r" \(\w\w\w\w?\w?\).*$", "", cardname)
                 decklist.append(cardname)
@@ -278,6 +279,10 @@ def get_your_deck(url):
     if len(commander_list) == 0:
         error = "Your decklist does not have a commander selected"
         return None, None, error
+    
+    print("\nYour List: ")
+    for card in sorted(decklist):
+        print(card)
 
     return commander_list, decklist, error
 
@@ -303,6 +308,11 @@ def get_average_deck(commander):
     for card in deck:
         card = re.sub(r"^\d+ ", "", card)
         average_decklist.append(card)
+    
+    print("\nAverage List:")
+    for card in sorted(average_decklist):
+        print(card)
+
     return average_decklist, error
 
 
