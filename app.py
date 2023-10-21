@@ -113,22 +113,43 @@ def uniqueness():
         if error != None:
             return render_template("uniqueness.html", error=error)
         edhrec_list, error = get_edhrec_list(commander)
+
+        card_filters = ['Plains', 'Island', 'Swamp', 'Mountain', 'Forest']
+        for general in commander:
+            card_filters.append(general)
+        
+        for filter in card_filters:
+            try:
+                your_deck.remove(filter)
+            except ValueError:
+                pass
+            try:
+                average_deck.remove(filter)
+            except ValueError:
+                pass
+            try:
+                edhrec_list.remove(filter)
+            except ValueError:
+                pass            
+
         (
             unique_average_count,
             unique_average_list,
             overlap_average_count,
             overlap_average_list,
         ) = get_card_counts(your_deck, average_deck)
+        
         (
             unique_edhrec_count,
             unique_edhrec_list,
             overlap_edhrec_count,
             overlap_edhrec_list,
         ) = get_card_counts(your_deck, edhrec_list)
-        session['unique_average_list'] = unique_average_list
-        session['unique_edhrec_list'] = unique_edhrec_list
-        session['overlap_average_list'] = overlap_average_list
-        session['overlap_edhrec_list'] = overlap_edhrec_list
+
+        session['unique_average_list'] = sorted(unique_average_list)
+        session['unique_edhrec_list'] = sorted(unique_edhrec_list)
+        session['overlap_average_list'] = sorted(overlap_average_list)
+        session['overlap_edhrec_list'] = sorted(overlap_edhrec_list)
         return render_template("uniqueness_results.html", 
                                unique_average_count=unique_average_count,
                                overlap_average_count=overlap_average_count,
@@ -260,7 +281,7 @@ def get_your_deck(url):
             commander_match = re.search(r".* \[commander\]$", str(card))
             if commander_match:
                 name = re.sub(r" \[commander\]$", "", unidecode(str(card)))
-                name = re.sub(r" \d+$", "", name)
+                name = re.sub(r" \d+s?$", "", name)
                 name = re.sub(r" \(\w\w\w\w?\w?\)$", "", name)
                 name = re.sub(r"^\d+x* ", "", name)
                 commander_list.append(name)
@@ -279,10 +300,6 @@ def get_your_deck(url):
     if len(commander_list) == 0:
         error = "Your decklist does not have a commander selected"
         return None, None, error
-    
-    print("\nYour List: ")
-    for card in sorted(decklist):
-        print(card)
 
     return commander_list, decklist, error
 
@@ -308,10 +325,6 @@ def get_average_deck(commander):
     for card in deck:
         card = re.sub(r"^\d+ ", "", card)
         average_decklist.append(card)
-    
-    print("\nAverage List:")
-    for card in sorted(average_decklist):
-        print(card)
 
     return average_decklist, error
 
